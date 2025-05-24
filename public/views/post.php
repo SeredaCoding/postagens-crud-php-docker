@@ -79,9 +79,9 @@ $(document).ready(function () {
             let html = `
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="mb-0">Detalhes da Postagem</h2>
-                    <button type="button" class="btn btn-outline-secondary" href="home.php">
+                    <a href="home.php" class="btn btn-outline-secondary ms-2">
                         <i class="fa-solid fa-arrow-left"></i> Voltar
-                    </button>
+                    </a>
                 </div>
                 <div id="post-view">
                     <div class="d-flex justify-content-between align-items-center">

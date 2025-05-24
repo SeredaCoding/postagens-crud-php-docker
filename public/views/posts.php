@@ -16,9 +16,9 @@ require_once(__DIR__.'/snippets/header.html');
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <h1 class="mb-0">Postagens Recentes</h1>
-                                <button type="button" class="btn btn-outline-secondary ms-2" href="home.php">
+                                <a href="home.php" class="btn btn-outline-secondary ms-2">
                                     <i class="fa-solid fa-arrow-left"></i> Voltar
-                                </button>
+                                </a>
                             </div>
                             <p class="lead">Explore as últimas publicações da comunidade.</p>
                             <hr>
