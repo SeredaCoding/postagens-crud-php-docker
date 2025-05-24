@@ -1,4 +1,6 @@
-<?php require_once(__DIR__.'/views/snippets/header.html'); ?>
+<?php 
+require_once(__DIR__.'/snippets/header.html');
+?>
 <body class="d-flex align-items-center justify-content-center vh-100">
     <div class="container">
         <div class="row justify-content-center">
@@ -58,59 +60,67 @@
     </div>
 
     <script>
-        $(document).ready(function() {
-            $('#loginForm').submit(function(event) {
+        $(document).ready(function () {
+            // Login
+            $('#loginForm').submit(function (event) {
                 event.preventDefault();
                 let email = $('#login-email').val();
                 let senha = $('#login-senha').val();
-                
+
                 $.ajax({
                     url: urlBase + "/api/login",
                     type: 'POST',
                     contentType: 'application/json',
+                    dataType: 'json',
                     data: JSON.stringify({ email: email, senha: senha }),
-                    success: function(response) {
-                        if (response.success) {
-                            $('#login-mensagem').html('<div class="alert alert-success">' + response.message + '</div>');          
+                    success: function (response) {
+                        if (response.status === 'success') {
                             window.location.href = 'home.php';
-                            
                         } else {
-                            $('#login-mensagem').html('<div class="alert alert-danger">' + response.error + '</div>');
+                            $('#login-mensagem').html('<div class="alert alert-danger">' + (response.message || 'Erro desconhecido.') + '</div>');
                         }
                     },
-                    error: function() {
-                        $('#login-mensagem').html('<div class="alert alert-danger">Erro ao conectar com o servidor.</div>');
+                    error: function (xhr) {
+                        const response = xhr.responseJSON;
+                        const mensagem = response?.message || "Erro ao conectar com o servidor.";
+                        $('#login-mensagem').html('<div class="alert alert-danger">' + mensagem + '</div>');
                     }
                 });
             });
 
-            $('#registerForm').submit(function(event) {
+            // Registro
+            $('#registerForm').submit(function (event) {
                 event.preventDefault();
+                let nome = $('#register-nome').val();
                 let email = $('#register-email').val();
                 let senha = $('#register-senha').val();
                 let confirmarSenha = $('#register-confirmar-senha').val();
-                
+
                 if (senha !== confirmarSenha) {
                     $('#register-mensagem').html('<div class="alert alert-danger">As senhas não coincidem.</div>');
                     return;
                 }
-                
+
                 $.ajax({
                     url: urlBase + "/api/register",
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify({ email: email, senha: senha }),
-                    success: function(response) {
-                        if (response.success) {
+                    dataType: 'json',
+                    data: JSON.stringify({ nome: nome, email: email, senha: senha }),
+                    success: function (response) {
+                        if (response.status === 'success') {
                             $('#register-mensagem').html('<div class="alert alert-success">' + response.message + '</div>');
                             $('#registerForm')[0].reset();
                             window.location.href = 'home.php';
                         } else {
-                            $('#register-mensagem').html('<div class="alert alert-danger">' + response.error + '</div>');
+                            let erro = response.errors?.email || response.errors?.nome || response.errors?.senha || response.message;
+                            $('#register-mensagem').html('<div class="alert alert-danger">' + erro + '</div>');
                         }
                     },
-                    error: function() {
-                        $('#register-mensagem').html('<div class="alert alert-danger">Erro ao conectar com o servidor.</div>');
+                    error: function (xhr) {
+                        const response = xhr.responseJSON;
+                        const mensagem = response?.message || "Erro ao conectar com o servidor.";
+                        $('#register-mensagem').html('<div class="alert alert-danger">' + mensagem + '</div>');
                     }
                 });
             });

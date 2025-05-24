@@ -4,7 +4,6 @@ services:
     container_name: php_app
     volumes:
       - ./src:/var/www/html
-      - ./docker/custom-php.ini:/usr/local/etc/php/conf.d/custom-php.ini
     ports:
       - 8000:80
     depends_on:
