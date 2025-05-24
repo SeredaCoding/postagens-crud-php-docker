@@ -14,7 +14,7 @@ VALUES ('Administrador', 'admin@teste.com', '$2y$10$6kDAY1.akeVJYC1ud1IIPOZMS5q5
 
 CREATE TABLE IF NOT EXISTS postagens (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  titulo VARCHAR(255) NOT NULL,
+  titulo VARCHAR(45) NOT NULL,
   conteudo TEXT NOT NULL,
   usuario_id INT NOT NULL,
   criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
