@@ -5,7 +5,7 @@ services:
       dockerfile: docker/Dockerfile
     container_name: php_app
     volumes:
-      - ../src:/var/www/html/src
+      - ../src/api:/var/www/html/api
       - ../public:/var/www/html/public
       - ./000-default.conf:/etc/apache2/sites-available/000-default.conf
     ports:
