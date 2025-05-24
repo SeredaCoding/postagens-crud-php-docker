@@ -44,7 +44,6 @@ class PostController {
         ];
     }
 
-
     public function show($id) {
         $postagem = $this->post->readById($id);
         if ($postagem) {
@@ -55,7 +54,6 @@ class PostController {
         http_response_code(404);
         return ["status" => "error", "message" => "Postagem não encontrada."];
     }
-
 
     public function update($id, $data) {
         session_start();
@@ -68,7 +66,7 @@ class PostController {
         $this->post->titulo = $data->titulo ?? null;
         $this->post->conteudo = $data->conteudo ?? null;
 
-        if ($this->post->update($id, $_SESSION['usuario_id'])) {
+        if ($this->post->update($id)) {
             return ["status" => "success", "message" => "Postagem atualizada com sucesso."];
         }
 
@@ -83,7 +81,7 @@ class PostController {
             return ["status" => "error", "message" => "Usuário não autenticado."];
         }
 
-        if ($this->post->delete($id, $_SESSION['usuario_id'])) {
+        if ($this->post->delete($id)) {
             return ["status" => "success", "message" => "Postagem deletada com sucesso."];
         }
 

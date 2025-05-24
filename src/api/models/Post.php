@@ -41,7 +41,11 @@ class Post {
 
 
     public function readById($id) {
-        $query = "SELECT * FROM {$this->table} WHERE id = :id LIMIT 1";
+        $query = "SELECT p.*, u.nome as autor_nome
+                  FROM {$this->table} p
+                  JOIN usuarios u ON p.usuario_id = u.id
+                  WHERE p.id = :id
+                  LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id);
         $stmt->execute();
@@ -62,25 +66,23 @@ class Post {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function update($id, $usuario_id) {
+    public function update($id) {
         $query = "UPDATE {$this->table}
                   SET titulo = :titulo, conteudo = :conteudo, editado_em = NOW()
-                  WHERE id = :id AND usuario_id = :usuario_id";
+                  WHERE id = :id";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':titulo', $this->titulo);
         $stmt->bindParam(':conteudo', $this->conteudo);
         $stmt->bindParam(':id', $id);
-        $stmt->bindParam(':usuario_id', $usuario_id);
 
         return $stmt->execute();
     }
 
-    public function delete($id, $usuario_id) {
-        $query = "DELETE FROM {$this->table} WHERE id = :id AND usuario_id = :usuario_id";
+    public function delete($id) {
+        $query = "DELETE FROM {$this->table} WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id);
-        $stmt->bindParam(':usuario_id', $usuario_id);
 
         return $stmt->execute();
     }
