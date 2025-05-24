@@ -8,25 +8,15 @@ if (!isset($_SESSION['usuario_id'])) {
 require_once(__DIR__.'/snippets/header.html');
 
 ?>
-<body class="d-flex flex-column vh-100">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="home.php">Blog Dev</a>
-            <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] == 1): ?>
-                <span class="navbar-text me-auto">Admin</span>
-            <?php endif; ?>
-            <div class="d-flex">
-                <a href="logout.php" class="btn btn-danger">Sair <i class="fa-solid fa-right-from-bracket"></i></a>
-            </div>
-        </div>
-    </nav>
+<body class="d-flex flex-column min-vh-100">
+    <?php require_once(__DIR__.'/snippets/menu.php'); ?>
     <main class="flex-grow-1 d-flex align-items-center justify-content-center">
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-md-8">
                     <div class="card shadow">
                         <div class="card-body">
-                            <h1 class="mb-4">Bem-vindo ao Blog, <?php echo htmlspecialchars($_SESSION['usuario_nome'] ?? 'Usuário'); ?>!</h1>
+                            <h1 class="mb-4">Bem-vindo ao Blog Dev, <?php echo htmlspecialchars($_SESSION['usuario_nome'] ?? 'Usuário'); ?>!</h1>
                             <p class="lead">
                                 Este é o seu espaço para compartilhar ideias, artigos e notícias.
                                 Abaixo, você pode começar a criar novas postagens ou navegar pelo conteúdo existente.
@@ -55,7 +45,7 @@ require_once(__DIR__.'/snippets/header.html');
 <script>
 $(document).ready(function () {
     $.ajax({
-        url: urlBase + "/api/posts/me",
+        url: urlBase + "/api/posts/meus",
         type: "GET",
         dataType: "json",
         success: function (response) {
@@ -73,9 +63,13 @@ $(document).ready(function () {
                         <ul class="list-group">`;
                     posts.forEach(post => {
                         html += `<li class="list-group-item">
-                                    <h5>${post.titulo}</h5>
-                                    <small class="text-muted">Publicado em ${new Date(post.criado_em).toLocaleDateString()}</small>
-                                    <p>${post.conteudo}</p>
+                                    <a href="post.php?id=${post.id}" style="text-decoration: none; color: inherit;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">${post.titulo}</h5>
+                                            <small class="text-muted ms-3">Publicado em ${new Date(post.criado_em).toLocaleDateString()}</small>
+                                        </div>
+                                        <p>${post.conteudo}</p>
+                                    </a>
                                 </li>`;
                     });
                     html += '</ul>';

@@ -6,15 +6,8 @@ if (!isset($_SESSION['usuario_id'])) {
 }
 require_once(__DIR__.'/snippets/header.html');
 ?>
-<body class="d-flex flex-column vh-100">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="home.php">Blog Dev</a>
-            <div class="d-flex">
-                <a href="logout.php" class="btn btn-danger">Sair <i class="fa-solid fa-right-from-bracket"></i></a>
-            </div>
-        </div>
-    </nav>
+<body class="d-flex flex-column min-vh-100">
+    <?php require_once(__DIR__.'/snippets/menu.php'); ?>
     <main class="flex-grow-1 d-flex align-items-center justify-content-center">
         <div class="container">
             <div class="row justify-content-center">
@@ -29,6 +22,13 @@ require_once(__DIR__.'/snippets/header.html');
                                     <span class="visually-hidden">Carregando...</span>
                                 </div>
                             </div>
+                            <div id="paginacao-controles" class="mt-4 row justify-content-center d-none">
+                                <div class="col-auto d-flex align-items-center">
+                                    <button id="btn-anterior" class="btn btn-outline-primary me-2">Anterior</button>
+                                    <span id="paginacao-indice" class="mx-2"></span>
+                                    <button id="btn-proximo" class="btn btn-outline-primary ms-2">Próximo</button>
+                                </div>
+                            </div>
                             <div id="todas-postagens" class="mt-4"></div>
                         </div>
                     </div>
@@ -40,37 +40,110 @@ require_once(__DIR__.'/snippets/header.html');
 </body>
 <script>
 $(document).ready(function () {
+    const postsPorPagina = 5;
+    let paginaAtual = 1;
+    let posts = [];
+
+    function renderizarPosts() {
+        const inicio = (paginaAtual - 1) * postsPorPagina;
+        const fim = inicio + postsPorPagina;
+        const postsPagina = posts.slice(inicio, fim);
+
+        let html = '<ul class="list-group">';
+        postsPagina.forEach(post => {
+            html += `<li class="list-group-item">
+                        <a href="post.php?id=${post.id}" style="text-decoration: none; color: inherit;">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <h5 class="mb-0">${post.titulo}</h5>
+                                    <small class="text-muted">por: ${post.autor_nome}</small>
+                                    <p class="mb-0">${post.conteudo}</p>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <small class="text-muted">Publicado em ${new Date(post.criado_em).toLocaleDateString()}</small>
+                                </div>
+                            </div>
+                        </a>
+                    </li>`;
+        });
+        html += '</ul>';
+
+        $("#todas-postagens").html(html);
+        atualizarControles();
+    }
+
+    function atualizarControles() {
+        $("#paginacao-controles").removeClass("d-none").show();
+        const totalPaginas = Math.ceil(posts.length / postsPorPagina);
+
+        // Atualiza texto da paginação
+        $("#paginacao-indice").text(`Página ${paginaAtual} de ${totalPaginas}`);
+
+        // Exibe/oculta botão anterior
+        if (paginaAtual === 1) {
+            $("#btn-anterior").hide();
+        } else {
+            $("#btn-anterior").show();
+        }
+
+        // Exibe/oculta botão próximo
+        if (paginaAtual >= totalPaginas || posts.length <= postsPorPagina) {
+            $("#btn-proximo").hide();
+        } else {
+            $("#btn-proximo").show();
+        }
+
+        // Oculta controles se não precisar paginar
+        if (totalPaginas <= 1) {
+            $("#paginacao-controles").hide();
+        } else {
+            $("#paginacao-controles").show();
+        }
+    }
+
+    $("#btn-anterior").click(function () {
+        if (paginaAtual > 1) {
+            paginaAtual--;
+            renderizarPosts();
+        }
+    });
+
+    $("#btn-proximo").click(function () {
+        const totalPaginas = Math.ceil(posts.length / postsPorPagina);
+        if (paginaAtual < totalPaginas) {
+            paginaAtual++;
+            renderizarPosts();
+        }
+    });
+
+    // Carrega os posts da API
     $.ajax({
         url: urlBase + "/api/posts",
         type: "GET",
         dataType: "json",
         success: function (response) {
-            $("#loader").addClass("d-none"); // Oculta o loader
+            $("#loader").addClass("d-none");
             if (response.status === "success" && response.data) {
-                let posts = Array.isArray(response.data) ? response.data : [response.data];
+                posts = Array.isArray(response.data) ? response.data : [response.data];
                 if (posts.length > 0) {
-                    let html = '<ul class="list-group">';
-                    posts.forEach(post => {
-                        html += `<li class="list-group-item">
-                                    <h5>${post.titulo}</h5>
-                                    <small class="text-muted">Publicado por ${post.autor_nome ?? 'Usuário desconhecido'} em ${new Date(post.criado_em).toLocaleDateString()}</small>
-                                    <p>${post.conteudo}</p>
-                                </li>`;
-                    });
-                    html += '</ul>';
-                    $("#todas-postagens").html(html);
+                    renderizarPosts();
                 } else {
                     $("#todas-postagens").html('<div class="alert alert-info">Nenhuma postagem encontrada.</div>');
+                    $("#paginacao-controles").hide();
                 }
             } else {
                 $("#todas-postagens").html('<div class="alert alert-info">' + (response.message || 'Nenhuma postagem disponível.') + '</div>');
+                $("#paginacao-controles").hide();
             }
         },
         error: function () {
             $("#loader").addClass("d-none");
             $("#todas-postagens").html('<div class="alert alert-danger">Erro ao carregar postagens.</div>');
+            $("#paginacao-controles").hide();
         }
     });
 });
 </script>
+
+
 </html>

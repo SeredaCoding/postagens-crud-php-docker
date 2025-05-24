@@ -7,7 +7,7 @@ if (isset($_SESSION['usuario_id'])) {
 }
 require_once(__DIR__.'/snippets/header.html');
 ?>
-<body class="d-flex align-items-center justify-content-center vh-100">
+<body class="d-flex align-items-center justify-content-center min-vh-100">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-5">

@@ -88,7 +88,7 @@ class PostController {
         return ["status" => "error", "message" => "Erro ao deletar postagem ou permissão negada."];
     }
 
-   public function meusPosts() {
+   public function meusPosts($limit = '') {
         session_start();
 
         if (!isset($_SESSION['usuario_id'])) {
@@ -97,7 +97,10 @@ class PostController {
         }
 
         $usuario_id = $_SESSION['usuario_id'];
-        $limit = 3;
+        if($limit !== '' && is_numeric($limit) && $limit > 0) {
+            $limit = $limit;
+        }
+
         $posts = $this->post->readByUserId($usuario_id, $limit);
 
         // Retorna sucesso com array, mesmo vazio

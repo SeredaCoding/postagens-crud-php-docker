@@ -26,9 +26,12 @@ switch ($parts[0]) {
     case 'posts':
         switch ($method) {
              case 'GET':
-                if (isset($parts[1]) && $parts[1] === 'me') {
+                if (isset($parts[1]) && $parts[1] === 'meus') {
+                    echo json_encode($postController->meusPosts(3));
+                } elseif (isset($parts[1]) && $parts[1] === 'todos-meus') {
                     echo json_encode($postController->meusPosts());
-                } elseif (isset($parts[1])) {
+                } 
+                elseif (isset($parts[1])) {
                     echo json_encode($postController->show($parts[1]));
                 } else {
                     echo json_encode($postController->list());

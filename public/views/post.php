@@ -8,24 +8,39 @@ if (!isset($_SESSION['usuario_id'])) {
 require_once(__DIR__ . '/snippets/header.html');
 
 $id = $_GET['id'] ?? null;
-if (!$id) {
-    echo "<div class='alert alert-danger'>ID da postagem não fornecido.</div>";
-    exit;
-}
 ?>
-<body class="d-flex flex-column vh-100">
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="home.php">Blog Dev</a>
-            <div class="d-flex">
-                <a href="logout.php" class="btn btn-danger">Sair <i class="fa-solid fa-right-from-bracket"></i></a>
-            </div>
-        </div>
-    </nav>
-
+<body class="d-flex flex-column min-vh-100">
+    <?php 
+    require_once(__DIR__.'/snippets/menu.php'); 
+    if (!$id) {
+        ?>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                document.body.innerHTML = `
+                    <main class="flex-grow-1 d-flex align-items-center justify-content-center">
+                        <div class="container">
+                            <div class="row justify-content-center">
+                                <div class="col-md-8">
+                                    <div class="alert alert-danger text-center mt-5 shadow">
+                                        <h4 class="alert-heading mb-3"><i class="fa-solid fa-triangle-exclamation"></i> Ops!</h4>
+                                        <p>ID da postagem não foi fornecido.<br>
+                                        Por favor, volte e selecione uma postagem válida.</p>
+                                        <a onclick="window.history.back();" class="btn btn-primary mt-3">
+                                            <i class="fa-solid fa-arrow-left"></i> Voltar para Meus Posts
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                `;
+            });
+        </script>
+        <?php
+        require_once(__DIR__ . '/snippets/footer.html');
+        exit;
+    }
+    ?>
     <main class="flex-grow-1 d-flex align-items-center justify-content-center">
         <div class="container">
             <div class="row justify-content-center">
@@ -58,36 +73,48 @@ $(document).ready(function () {
         if (response.status === "success") {
             const post = response.data;
             const isAuthor = post.usuario_id == usuarioId;
+            const isAdmin = <?= (isset($_SESSION['admin']) && $_SESSION['admin'] == 1) ? 'true' : 'false' ?>;
 
             let html = `
                 <div id="post-view">
-                    <h2>${post.titulo}</h2>
-                    <small class="text-muted">Publicado em ${new Date(post.criado_em).toLocaleDateString()}</small>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0">${post.titulo}</h2>
+                        <small class="text-muted ms-3">Publicado em ${new Date(post.criado_em).toLocaleDateString()}</small>
+                    </div>
                     <p class="mt-3">${post.conteudo}</p>
                 </div>
             `;
 
-            if (isAuthor) {
+            if (isAuthor || isAdmin) {
                 html += `
-                    <div class="mt-4">
-                        <button class="btn btn-primary me-2" onclick="habilitarEdicao('${post.titulo}', \`${post.conteudo.replace(/`/g, '\\`')}\`)">
+                    <div class="mt-4 text-end">
+                        <button class="btn btn-primary me-2 btn-editar" onclick="habilitarEdicao('${post.titulo}', \`${post.conteudo.replace(/`/g, '\\`')}\`)">
                             Editar <i class="fa-solid fa-pen-to-square"></i>
                         </button>
-                        <button class="btn btn-danger" onclick="excluirPost(${post.id})">
+                        <button class="btn btn-danger btn-excluir" onclick="excluirPost(${post.id})" id="btn-excluir">
+                            <i class="fas fa-spinner fa-spin me-2 d-none" id="loader-icon"></i>
                             Excluir <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
+
                     <form id="form-edicao" class="mt-4 d-none">
                         <div class="mb-3">
                             <label>Título</label>
-                            <input type="text" class="form-control" id="edit-titulo">
+                            <input type="text" class="form-control" id="edit-titulo" maxlength="45">
+                            <small id="edit-contador-titulo" class="form-text text-muted">0 / 45 caracteres</small>
                         </div>
                         <div class="mb-3">
                             <label>Conteúdo</label>
-                            <textarea class="form-control" id="edit-conteudo" rows="5"></textarea>
+                            <textarea class="form-control" id="edit-conteudo" rows="5" maxlength="300"></textarea>
+                            <small id="edit-contador-caracteres" class="form-text text-muted">0 / 300 caracteres</small>
                         </div>
-                        <button type="submit" class="btn btn-success">Salvar Alterações</button>
-                        <button type="button" class="btn btn-secondary" onclick="cancelarEdicao()">Cancelar</button>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="submit" id="btn-salvar" class="btn btn-success">
+                                <span id="btn-text">Salvar Alterações</span>
+                                <span id="btn-loader" class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></span>
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="cancelarEdicao()">Cancelar</button>
+                        </div>
                     </form>
                 `;
             }
@@ -99,16 +126,61 @@ $(document).ready(function () {
     });
 });
 
+$(document).on("input", "#edit-titulo, #edit-conteudo", function () {
+    const id = $(this).attr("id");
+    const texto = $(this).val();
+    const comprimento = texto.length;
+
+    let limite = 0;
+    let $contador = null;
+
+    if (id === "edit-titulo") {
+        limite = 45;
+        $contador = $("#edit-contador-titulo");
+    } else {
+        limite = 300;
+        $contador = $("#edit-contador-caracteres");
+    }
+
+    $contador.text(`${comprimento} / ${limite} caracteres`);
+
+    const $botaoSalvar = $("#btn-salvar");
+
+    if (comprimento > limite) {
+        $contador.addClass("text-danger");
+        $botaoSalvar.prop("disabled", true);
+    } else {
+        $contador.removeClass("text-danger");
+
+        // Verifica se o outro campo também está dentro do limite antes de habilitar o botão
+        const tituloValido = $("#edit-titulo").val().length <= 45;
+        const conteudoValido = $("#edit-conteudo").val().length <= 300;
+
+        if (tituloValido && conteudoValido) {
+            $botaoSalvar.prop("disabled", false);
+        }
+    }
+});
+
 function habilitarEdicao(titulo, conteudo) {
     $('#edit-titulo').val(titulo);
     $('#edit-conteudo').val(conteudo);
     $('#form-edicao').removeClass('d-none');
     $('#post-view').hide();
+
+    // Esconde os botões de editar e excluir
+    $('.btn-editar,.btn-excluir').hide();
+    // Atualiza o contador de caracteres
+    $('#edit-conteudo').trigger('input');
+    $('#edit-titulo').trigger('input');
 }
 
 function cancelarEdicao() {
     $('#form-edicao').addClass('d-none');
     $('#post-view').show();
+
+    // Mostra os botões de editar e excluir novamente
+    $('.btn-editar,.btn-excluir').show();
 }
 
 $('#post-container').on('submit', '#form-edicao', function (e) {
@@ -125,6 +197,28 @@ $('#post-container').on('submit', '#form-edicao', function (e) {
         });
         return;
     }
+    if (titulo.length > 45) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Atenção!',
+            text: 'O título não pode ultrapassar 45 caracteres.'
+        });
+        return;
+    }
+
+    if (conteudo.length > 300) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Atenção!',
+            text: 'O conteúdo não pode ultrapassar 300 caracteres.'
+        });
+        return;
+    }
+
+    // Mostrar loader dentro do botão, desabilitar botão
+    $('#btn-text').addClass('d-none');
+    $('#btn-loader').removeClass('d-none');
+    $('#btn-salvar').prop('disabled', true);
 
     $.ajax({
         url: `${urlBase}/api/posts/${postId}`,
@@ -132,6 +226,11 @@ $('#post-container').on('submit', '#form-edicao', function (e) {
         contentType: 'application/json',
         data: JSON.stringify({ titulo, conteudo }),
         success: function (response) {
+            // Esconder loader e habilitar botão
+            $('#btn-text').removeClass('d-none');
+            $('#btn-loader').addClass('d-none');
+            $('#btn-salvar').prop('disabled', false);
+
             if (response.status === "success") {
                 Swal.fire({
                     icon: 'success',
@@ -147,6 +246,11 @@ $('#post-container').on('submit', '#form-edicao', function (e) {
             }
         },
         error: function () {
+            // Esconder loader e habilitar botão
+            $('#btn-text').removeClass('d-none');
+            $('#btn-loader').addClass('d-none');
+            $('#btn-salvar').prop('disabled', false);
+
             Swal.fire({
                 icon: 'error',
                 title: 'Erro!',
@@ -155,6 +259,7 @@ $('#post-container').on('submit', '#form-edicao', function (e) {
         }
     });
 });
+
 
 function excluirPost(id) {
     Swal.fire({
@@ -168,10 +273,17 @@ function excluirPost(id) {
         cancelButtonText: 'Cancelar'
     }).then((result) => {
         if (result.isConfirmed) {
+            // Mostrar spinner
+            $("#loader-icon").removeClass("d-none");
+            $("#btn-excluir").prop("disabled", true);
+
             $.ajax({
                 url: `${urlBase}/api/posts/${id}`,
                 type: "DELETE",
                 success: function (response) {
+                    $("#loader-icon").addClass("d-none");
+                    $("#btn-excluir").prop("disabled", false);
+
                     if (response.status === "success") {
                         Swal.fire({
                             icon: 'success',
@@ -189,6 +301,9 @@ function excluirPost(id) {
                     }
                 },
                 error: function () {
+                    $("#loader-icon").addClass("d-none");
+                    $("#btn-excluir").prop("disabled", false);
+
                     Swal.fire({
                         icon: 'error',
                         title: 'Erro!',
@@ -199,5 +314,6 @@ function excluirPost(id) {
         }
     });
 }
+
 </script>
 </html>
