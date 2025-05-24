@@ -38,17 +38,7 @@ require_once(__DIR__.'/snippets/header.html');
         </div>
     </main>
 
-    <footer class="bg-light text-center py-3 mt-auto shadow-sm">
-        <script>
-            const anoAtual = new Date().getFullYear();
-            const anoMaisRecente = 2025;
-            if (anoAtual == anoMaisRecente) {
-                document.write(`&copy; ${anoAtual} Blog Dev. Todos os direitos reservados.`);
-            } else {
-                document.write(`&copy; ${anoMaisRecente} - ${anoAtual} Blog Dev. Todos os direitos reservados.`);
-            }
-        </script>
-    </footer>
+    <?php require_once(__DIR__.'/snippets/footer.html'); ?>
 </body>
 <script>
 $(document).ready(function () {
@@ -64,9 +54,11 @@ $(document).ready(function () {
                     let html = '<ul class="list-group">';
                     posts.forEach(post => {
                         html += `<li class="list-group-item">
-                                    <h5>${post.titulo}</h5>
-                                    <small class="text-muted">Publicado em ${new Date(post.criado_em).toLocaleDateString()}</small>
-                                    <p>${post.conteudo}</p>
+                                    <a href="post.php?id=${post.id}" style="text-decoration: none; color: inherit;">
+                                        <h5>${post.titulo}</h5>
+                                        <small class="text-muted">Publicado em ${new Date(post.criado_em).toLocaleDateString()}</small>
+                                        <p>${post.conteudo}</p>
+                                    </a>
                                 </li>`;
                     });
                     html += '</ul>';

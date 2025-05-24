@@ -12,6 +12,9 @@ require_once(__DIR__.'/snippets/header.html');
     <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="home.php">Blog Dev</a>
+            <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] == 1): ?>
+                <span class="navbar-text me-auto">Admin</span>
+            <?php endif; ?>
             <div class="d-flex">
                 <a href="logout.php" class="btn btn-danger">Sair <i class="fa-solid fa-right-from-bracket"></i></a>
             </div>
@@ -28,10 +31,10 @@ require_once(__DIR__.'/snippets/header.html');
                                 Este é o seu espaço para compartilhar ideias, artigos e notícias.
                                 Abaixo, você pode começar a criar novas postagens ou navegar pelo conteúdo existente.
                             </p>
-                            <a href="criar_post.php" class="btn btn-primary me-2">
+                            <a href="criar_post.php" class="btn btn-primary me-2 mb-2 mb-sm-0">
                                 <i class="fa-solid fa-pen-to-square"></i> Criar nova postagem
                             </a>
-                            <a href="posts.php" class="btn btn-outline-secondary">
+                            <a href="posts.php" class="btn btn-outline-secondary mb-2 mb-sm-0">
                                 <i class="fa-solid fa-book-open"></i> Ver postagens
                             </a>
                             <hr>
@@ -47,17 +50,7 @@ require_once(__DIR__.'/snippets/header.html');
             </div>
         </div>
     </main>
-    <footer class="bg-light text-center py-3 mt-auto shadow-sm">
-        <script>
-            const anoAtual = new Date().getFullYear();
-            const anoMaisRecente = 2025;
-            if (anoAtual == anoMaisRecente) {
-                document.write(`&copy; ${anoAtual} Blog Dev. Todos os direitos reservados.`);
-            } else {
-                document.write(`&copy; ${anoMaisRecente} - ${anoAtual} Blog Dev. Todos os direitos reservados.`);
-            }
-        </script>
-    </footer>
+    <?php require_once(__DIR__.'/snippets/footer.html'); ?>
 </body>
 <script>
 $(document).ready(function () {
@@ -88,7 +81,7 @@ $(document).ready(function () {
                     html += '</ul>';
                     $("#meus-posts").html(html);
                 } else {
-                    $("#meus-posts").html('<div class="alert alert-info">Nenhuma postagem encontrada.</div>');
+                    $("#meus-posts").html('<div class="alert alert-info">Nenhuma postagem sua encontrada.</div>');
                 }
             } else {
                 $("#meus-posts").html('<div class="alert alert-info">' + (response.message || 'Nenhuma postagem encontrada.') + '</div>');

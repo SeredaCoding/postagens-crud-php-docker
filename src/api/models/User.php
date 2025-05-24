@@ -55,13 +55,14 @@ class User {
     }
 
     public function login() {
-        $query = "SELECT id, nome, email, senha FROM " . $this->table . " WHERE email = :email LIMIT 1";
+        $query = "SELECT id, nome, email, admin, senha FROM " . $this->table . " WHERE email = :email LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':email', $this->email);
         $stmt->execute();
 
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($user && password_verify($this->senha, $user['senha'])) {
+            unset($user['senha']); // Remove a senha do array
             return $user; // retorna array com id, nome, email
         }
         return false;

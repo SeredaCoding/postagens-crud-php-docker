@@ -32,6 +32,7 @@ class UserController {
                 }
                 $_SESSION['usuario_id'] = $usuario['id'];
                 $_SESSION['usuario_nome'] = $usuario['nome'];
+                $_SESSION['admin'] = $usuario['admin'];
 
                 http_response_code(201);
                 return ["status" => "success", "message" => "Usuário criado com sucesso."];
@@ -63,7 +64,7 @@ class UserController {
 
             $_SESSION['usuario_id'] = $result['id'];
             $_SESSION['usuario_nome'] = $result['nome'];
-            $_SESSION['usuario_email'] = $result['email'];
+            $_SESSION['admin'] = $result['admin'];
 
             http_response_code(200);
             return ["status" => "success", "data" => $result];

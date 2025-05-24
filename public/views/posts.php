@@ -36,17 +36,7 @@ require_once(__DIR__.'/snippets/header.html');
             </div>
         </div>
     </main>
-    <footer class="bg-light text-center py-3 mt-auto shadow-sm">
-        <script>
-            const anoAtual = new Date().getFullYear();
-            const anoMaisRecente = 2025;
-            if (anoAtual == anoMaisRecente) {
-                document.write(`&copy; ${anoAtual} Blog Dev. Todos os direitos reservados.`);
-            } else {
-                document.write(`&copy; ${anoMaisRecente} - ${anoAtual} Blog Dev. Todos os direitos reservados.`);
-            }
-        </script>
-    </footer>
+    <?php require_once(__DIR__.'/snippets/footer.html'); ?>
 </body>
 <script>
 $(document).ready(function () {

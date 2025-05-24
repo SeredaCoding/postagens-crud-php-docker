@@ -31,14 +31,15 @@ require_once(__DIR__.'/snippets/header.html');
                                 <div class="mb-3">
                                     <label for="conteudo" class="form-label">Conteúdo</label>
                                     <textarea class="form-control" id="conteudo" name="conteudo" rows="6" required></textarea>
+                                    <small id="contador-caracteres" class="form-text text-muted">0 / 300 caracteres</small>
                                 </div>
                                 <div id="mensagem" class="mb-3"></div>
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fa-solid fa-paper-plane"></i> Publicar
                                 </button>
-                                <a href="posts.php" class="btn btn-outline-secondary ms-2">
+                                <button type="button" class="btn btn-outline-secondary ms-2" onclick="window.history.back();">
                                     <i class="fa-solid fa-arrow-left"></i> Voltar
-                                </a>
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -47,20 +48,31 @@ require_once(__DIR__.'/snippets/header.html');
         </div>
     </main>
 
-    <footer class="bg-light text-center py-3 mt-auto shadow-sm">
-        <script>
-            const anoAtual = new Date().getFullYear();
-            const anoMaisRecente = 2025;
-            if (anoAtual == anoMaisRecente) {
-                document.write(`&copy; ${anoAtual} Blog Dev. Todos os direitos reservados.`);
-            } else {
-                document.write(`&copy; ${anoMaisRecente} - ${anoAtual} Blog Dev. Todos os direitos reservados.`);
-            }
-        </script>
-    </footer>
+    <?php require_once(__DIR__.'/snippets/footer.html'); ?>
 </body>
 <script>
 $(document).ready(function () {
+    const $conteudo = $("#conteudo");
+    const $contador = $("#contador-caracteres");
+    const $mensagem = $("#mensagem");
+    const $botao = $("#form-postagem button[type='submit']");
+
+    $conteudo.on("input", function () {
+        const texto = $conteudo.val();
+        const comprimento = texto.length;
+
+        $contador.text(`${comprimento} / 300 caracteres`);
+
+        if (comprimento > 300) {
+            $contador.addClass("text-danger");
+            $mensagem.html('<div class="alert alert-warning">O conteúdo não pode ultrapassar 300 caracteres.</div>');
+            $botao.prop("disabled", true);
+        } else {
+            $contador.removeClass("text-danger");
+            $mensagem.html('');
+            $botao.prop("disabled", false);
+        }
+    });
     $("#form-postagem").on("submit", function (e) {
         e.preventDefault();
 
