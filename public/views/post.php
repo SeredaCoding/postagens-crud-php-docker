@@ -77,14 +77,24 @@ $(document).ready(function () {
             const isAdmin = <?= (isset($_SESSION['admin']) && $_SESSION['admin'] == 1) ? 'true' : 'false' ?>;
 
             let html = `
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">Detalhes da Postagem</h2>
+                    <button type="button" class="btn btn-outline-secondary" onclick="window.history.back();">
+                        <i class="fa-solid fa-arrow-left"></i> Voltar
+                    </button>
+                </div>
                 <div id="post-view">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h2 class="mb-0">${post.titulo}</h2>
+                        <div>
+                            <h2 class="mb-0">${post.titulo}</h2>
+                            <small class="text-muted">por ${post.autor_nome}</small>
+                        </div>
                         <small class="text-muted ms-3">Publicado em ${new Date(post.criado_em).toLocaleDateString()}</small>
                     </div>
                     <p class="mt-3">${post.conteudo}</p>
                 </div>
             `;
+
 
             if (isAuthor || isAdmin) {
                 html += `

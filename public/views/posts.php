@@ -14,7 +14,12 @@ require_once(__DIR__.'/snippets/header.html');
                 <div class="col-md-10">
                     <div class="card shadow">
                         <div class="card-body">
-                            <h1 class="mb-4">Postagens Recentes</h1>
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h1 class="mb-0">Postagens Recentes</h1>
+                                <button type="button" class="btn btn-outline-secondary ms-2" onclick="window.history.back();">
+                                    <i class="fa-solid fa-arrow-left"></i> Voltar
+                                </button>
+                            </div>
                             <p class="lead">Explore as últimas publicações da comunidade.</p>
                             <hr>
                             <div id="loader" class="text-center my-4">
