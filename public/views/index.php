@@ -32,7 +32,10 @@ require_once(__DIR__.'/snippets/header.html');
                                         <input type="password" class="form-control" id="login-senha" placeholder="&#xf023; Senha" style="font-family:Arial, FontAwesome" required>
                                     </div>
                                     <div class="d-grid">
-                                        <button type="submit" class="btn btn-primary">Entrar <i class="fa-solid fa-arrow-right"></i></button>
+                                        <button type="submit" class="btn btn-primary" id="btn-login">
+                                            <span class="btn-text">Entrar <i class="fa-solid fa-arrow-right"></i></span>
+                                            <span class="btn-loader" style="display:none;"><i class="fas fa-spinner fa-spin"></i></span>
+                                        </button>
                                     </div>
                                     <div id="login-mensagem" class="mt-3 text-center"></div>
                                 </form>
@@ -53,7 +56,10 @@ require_once(__DIR__.'/snippets/header.html');
                                         <input type="password" class="form-control" id="register-confirmar-senha" placeholder="&#xf023; Confirmar Senha" style="font-family:Arial, FontAwesome" required>
                                     </div>
                                     <div class="d-grid">
-                                        <button type="submit" class="btn btn-success">Registrar <i class="fa-solid fa-check"></i></button>
+                                        <button type="submit" class="btn btn-success" id="btn-register">
+                                            <span class="btn-text">Registrar <i class="fa-solid fa-check"></i></span>
+                                            <span class="btn-loader" style="display:none;"><i class="fas fa-spinner fa-spin"></i></span>
+                                        </button>
                                     </div>
                                     <div id="register-mensagem" class="mt-3 text-center"></div>
                                 </form>
@@ -64,71 +70,93 @@ require_once(__DIR__.'/snippets/header.html');
             </div>
         </div>
     </div>
-
     <script>
-        $(document).ready(function () {
-            // Login
-            $('#loginForm').submit(function (event) {
-                event.preventDefault();
-                let email = $('#login-email').val();
-                let senha = $('#login-senha').val();
+        // Login
+        $('#loginForm').submit(function (event) {
+            event.preventDefault();
+            
+            const btn = $('#btn-login');
+            btn.prop('disabled', true);
+            btn.find('.btn-text').hide();
+            btn.find('.btn-loader').show();
 
-                $.ajax({
-                    url: urlBase + "/api/login",
-                    type: 'POST',
-                    contentType: 'application/json',
-                    dataType: 'json',
-                    data: JSON.stringify({ email: email, senha: senha }),
-                    success: function (response) {
-                        if (response.status === 'success') {
-                            window.location.href = 'home.php';
-                        } else {
-                            $('#login-mensagem').html('<div class="alert alert-danger">' + (response.message || 'Erro desconhecido.') + '</div>');
-                        }
-                    },
-                    error: function (xhr) {
-                        const response = xhr.responseJSON;
-                        const mensagem = response?.message || "Erro ao conectar com o servidor.";
-                        $('#login-mensagem').html('<div class="alert alert-danger">' + mensagem + '</div>');
+            let email = $('#login-email').val();
+            let senha = $('#login-senha').val();
+
+            $.ajax({
+                url: urlBase + "/api/login",
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({ email: email, senha: senha }),
+                success: function (response) {
+                    if (response.status === 'success') {
+                        window.location.href = 'home.php';
+                    } else {
+                        $('#login-mensagem').html('<div class="alert alert-danger">' + (response.message || 'Erro desconhecido.') + '</div>');
+                        btn.prop('disabled', false);
+                        btn.find('.btn-text').show();
+                        btn.find('.btn-loader').hide();
                     }
-                });
-            });
-
-            // Registro
-            $('#registerForm').submit(function (event) {
-                event.preventDefault();
-                let nome = $('#register-nome').val();
-                let email = $('#register-email').val();
-                let senha = $('#register-senha').val();
-                let confirmarSenha = $('#register-confirmar-senha').val();
-
-                if (senha !== confirmarSenha) {
-                    $('#register-mensagem').html('<div class="alert alert-danger">As senhas não coincidem.</div>');
-                    return;
+                },
+                error: function (xhr) {
+                    const response = xhr.responseJSON;
+                    const mensagem = response?.message || "Erro ao conectar com o servidor.";
+                    $('#login-mensagem').html('<div class="alert alert-danger">' + mensagem + '</div>');
+                    btn.prop('disabled', false);
+                    btn.find('.btn-text').show();
+                    btn.find('.btn-loader').hide();
                 }
+            });
+        });
 
-                $.ajax({
-                    url: urlBase + "/api/register",
-                    type: 'POST',
-                    contentType: 'application/json',
-                    dataType: 'json',
-                    data: JSON.stringify({ nome: nome, email: email, senha: senha }),
-                    success: function (response) {
-                        if (response.status === 'success') {
-                            $('#register-mensagem').html('<div class="alert alert-success">' + response.message + '</div>');
-                            $('#registerForm')[0].reset();
-                            window.location.href = 'home.php';
-                        } else {
-                            let erro = response.errors?.email || response.errors?.nome || response.errors?.senha || response.message;
-                            $('#register-mensagem').html('<div class="alert alert-danger">' + erro + '</div>');
-                        }
-                    },
-                    error: function (xhr) {
-                        const response = xhr.responseJSON;
-                        const mensagem = response?.message || "Erro ao conectar com o servidor.";
-                        $('#register-mensagem').html('<div class="alert alert-danger">' + mensagem + '</div>');
+        // Registro
+        $('#registerForm').submit(function (event) {
+            event.preventDefault();
+
+            const btn = $('#btn-register');
+
+            let nome = $('#register-nome').val();
+            let email = $('#register-email').val();
+            let senha = $('#register-senha').val();
+            let confirmarSenha = $('#register-confirmar-senha').val();
+
+            if (senha !== confirmarSenha) {
+                $('#register-mensagem').html('<div class="alert alert-danger">As senhas não coincidem.</div>');
+                return;
+            }
+
+            btn.prop('disabled', true);
+            btn.find('.btn-text').hide();
+            btn.find('.btn-loader').show();
+
+            $.ajax({
+                url: urlBase + "/api/register",
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({ nome: nome, email: email, senha: senha }),
+                success: function (response) {
+                    if (response.status === 'success') {
+                        $('#register-mensagem').html('<div class="alert alert-success">' + response.message + '</div>');
+                        $('#registerForm')[0].reset();
+                        window.location.href = 'home.php';
+                    } else {
+                        let erro = response.errors?.email || response.errors?.nome || response.errors?.senha || response.message;
+                        $('#register-mensagem').html('<div class="alert alert-danger">' + erro + '</div>');
+                        btn.prop('disabled', false);
+                        btn.find('.btn-text').show();
+                        btn.find('.btn-loader').hide();
                     }
-                });
+                },
+                error: function (xhr) {
+                    const response = xhr.responseJSON;
+                    const mensagem = response?.message || "Erro ao conectar com o servidor.";
+                    $('#register-mensagem').html('<div class="alert alert-danger">' + mensagem + '</div>');
+                    btn.prop('disabled', false);
+                    btn.find('.btn-text').show();
+                    btn.find('.btn-loader').hide();
+                }
             });
         });
     </script>

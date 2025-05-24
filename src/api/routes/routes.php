@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../controllers/UserController.php';
+require_once __DIR__ . '/../controllers/PostController.php';
 
 header('Content-Type: application/json');
 $method = $_SERVER['REQUEST_METHOD'];
@@ -10,6 +11,8 @@ $body = json_decode(file_get_contents("php://input"));
 
 $db = (new DB())->connect();
 $controller = new UserController($db);
+$postController = new PostController($db);
+
 
 switch ($parts[0]) {
     case 'register':
@@ -19,22 +22,45 @@ switch ($parts[0]) {
     case 'login':
         echo json_encode($controller->login($body));
         break;
-
-    case 'users':
-        if ($method === 'GET' && count($parts) === 1) {
-            echo json_encode($controller->list());
-        } elseif ($method === 'GET' && count($parts) === 2) {
-            echo json_encode($controller->show($parts[1]));
-        } elseif ($method === 'PUT' && count($parts) === 2) {
-            echo json_encode($controller->update($parts[1], $body));
-        } elseif ($method === 'DELETE' && count($parts) === 2) {
-            echo json_encode($controller->delete($parts[1]));
-        } else {
-            http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "Requisição inválida."]);
+    // Rotas de postagem
+    case 'posts':
+        switch ($method) {
+             case 'GET':
+                if (isset($parts[1]) && $parts[1] === 'me') {
+                    echo json_encode($postController->meusPosts());
+                } elseif (isset($parts[1])) {
+                    echo json_encode($postController->show($parts[1]));
+                } else {
+                    echo json_encode($postController->list());
+                }
+                break;
+            case 'POST':
+                echo json_encode($postController->create($body));
+                break;
+            case 'PUT':
+            case 'PATCH':
+                // PUT /posts/{id}
+                if (isset($parts[1])) {
+                    echo json_encode($postController->update($parts[1], $body));
+                } else {
+                    http_response_code(400);
+                    echo json_encode(["status" => "error", "message" => "ID da postagem é obrigatório."]);
+                }
+                break;
+            case 'DELETE':
+                // DELETE /posts/{id}
+                if (isset($parts[1])) {
+                    echo json_encode($postController->delete($parts[1]));
+                } else {
+                    http_response_code(400);
+                    echo json_encode(["status" => "error", "message" => "ID da postagem é obrigatório."]);
+                }
+                break;
+            default:
+                http_response_code(405);
+                echo json_encode(["status" => "error", "message" => "Método não permitido."]);
         }
         break;
-
     default:
         http_response_code(404);
         echo json_encode(["status" => "error", "message" => "Rota não encontrada"]);
