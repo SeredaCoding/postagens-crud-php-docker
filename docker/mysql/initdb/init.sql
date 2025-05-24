@@ -5,8 +5,12 @@ CREATE TABLE IF NOT EXISTS usuarios (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
   email VARCHAR(100) NOT NULL UNIQUE,
-  senha VARCHAR(255) NOT NULL
+  senha VARCHAR(255) NOT NULL,
+  admin BOOLEAN NOT NULL DEFAULT 0
 );
+
+INSERT INTO usuarios (nome, email, senha, admin)
+VALUES ('Administrador', 'admin@teste.com', '$2y$10$6kDAY1.akeVJYC1ud1IIPOZMS5q58qAPvBkGikcetWodzxBdo2v0G', 1);
 
 CREATE TABLE IF NOT EXISTS postagens (
   id INT AUTO_INCREMENT PRIMARY KEY,
