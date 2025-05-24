@@ -79,7 +79,7 @@ $(document).ready(function () {
             let html = `
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="mb-0">Detalhes da Postagem</h2>
-                    <button type="button" class="btn btn-outline-secondary" onclick="window.history.back();">
+                    <button type="button" class="btn btn-outline-secondary" href="home.php">
                         <i class="fa-solid fa-arrow-left"></i> Voltar
                     </button>
                 </div>
@@ -87,7 +87,7 @@ $(document).ready(function () {
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h2 class="mb-0">${post.titulo}</h2>
-                            <small class="text-muted">por ${post.autor_nome}</small>
+                            <small class="text-muted">por: ${post.autor_nome}</small>
                         </div>
                         <small class="text-muted ms-3">Publicado em ${new Date(post.criado_em).toLocaleDateString()}</small>
                     </div>
