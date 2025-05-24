@@ -1,4 +1,10 @@
-<?php 
+<?php
+session_start();
+
+if (isset($_SESSION['usuario_id'])) {
+    header("Location: home.php");
+    exit;
+}
 require_once(__DIR__.'/snippets/header.html');
 ?>
 <body class="d-flex align-items-center justify-content-center vh-100">

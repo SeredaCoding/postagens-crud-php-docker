@@ -12,38 +12,7 @@ class User {
         $this->conn = $db;
     }
 
-    public function register() {
-        if (!$this->nome || !$this->email || !$this->senha) {
-            http_response_code(400);
-            return json_encode([
-                "status" => "error",
-                "message" => "Campos obrigatórios ausentes.",
-                "data" => null,
-                "errors" => [
-                    "nome" => $this->nome ? null : "Nome é obrigatório.",
-                    "email" => $this->email ? null : "Email é obrigatório.",
-                    "senha" => $this->senha ? null : "Senha é obrigatória."
-                ]
-            ]);
-        }
-
-        $checkQuery = "SELECT id FROM " . $this->table . " WHERE email = :email";
-        $checkStmt = $this->conn->prepare($checkQuery);
-        $checkStmt->bindParam(":email", $this->email);
-        $checkStmt->execute();
-
-        if ($checkStmt->rowCount() > 0) {
-            http_response_code(409); // 409 Conflict
-            return json_encode([
-                "status" => "error",
-                "message" => "E-mail já cadastrado.",
-                "data" => null,
-                "errors" => [
-                    "email" => "Este e-mail já está em uso."
-                ]
-            ]);
-        }
-
+    public function create() {
         $query = "INSERT INTO " . $this->table . " SET nome=:nome, email=:email, senha=:senha";
         $stmt = $this->conn->prepare($query);
 
@@ -53,70 +22,57 @@ class User {
         $stmt->bindParam(":email", $this->email);
         $stmt->bindParam(":senha", $senhaHash);
 
-        if ($stmt->execute()) {
-            http_response_code(201);
-            return json_encode([
-                "status" => "success",
-                "message" => "Usuário criado com sucesso.",
-                "data" => null,
-                "errors" => null
-            ]);
-        } else {
-            http_response_code(500);
-            return json_encode([
-                "status" => "error",
-                "message" => "Erro ao criar usuário.",
-                "data" => null,
-                "errors" => null
-            ]);
-        }
+        return $stmt->execute();
+    }
+
+    public function readAll() {
+        $query = "SELECT id, nome, email FROM " . $this->table;
+        return $this->conn->query($query)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function readById($id) {
+        $query = "SELECT id, nome, email FROM " . $this->table . " WHERE id = :id LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function update($id) {
+        $query = "UPDATE " . $this->table . " SET nome=:nome, email=:email WHERE id=:id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":nome", $this->nome);
+        $stmt->bindParam(":email", $this->email);
+        $stmt->bindParam(":id", $id);
+        return $stmt->execute();
+    }
+
+    public function delete($id) {
+        $query = "DELETE FROM " . $this->table . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $id);
+        return $stmt->execute();
     }
 
     public function login() {
-        if (!$this->email || !$this->senha) {
-            http_response_code(400);
-            return json_encode([
-                "status" => "error",
-                "message" => "Campos obrigatórios ausentes.",
-                "data" => null,
-                "errors" => [
-                    "email" => $this->email ? null : "Email é obrigatório.",
-                    "senha" => $this->senha ? null : "Senha é obrigatória."
-                ]
-            ]);
-        }
-
-        $query = "SELECT id, nome, email, senha FROM " . $this->table . " WHERE email = :email";
+        $query = "SELECT id, nome, email, senha FROM " . $this->table . " WHERE email = :email LIMIT 1";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":email", $this->email);
+        $stmt->bindParam(':email', $this->email);
+        $stmt->execute();
 
-        if ($stmt->execute() && $stmt->rowCount() > 0) {
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (password_verify($this->senha, $row['senha'])) {
-                http_response_code(200);
-                return json_encode([
-                    "status" => "success",
-                    "message" => "Login efetuado com sucesso.",
-                    "data" => [
-                        "user" => [
-                            "id" => $row['id'],
-                            "nome" => $row['nome'],
-                            "email" => $row['email']
-                        ]
-                    ],
-                    "errors" => null
-                ]);
-            }
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($user && password_verify($this->senha, $user['senha'])) {
+            return $user; // retorna array com id, nome, email
         }
+        return false;
+    }
 
-        http_response_code(401);
-        return json_encode([
-            "status" => "error",
-            "message" => "Usuário ou senha inválidos.",
-            "data" => null,
-            "errors" => [
-                "email" => "Verifique o email e senha informados."
-            ]
-        ]);
+    public function emailExists($email) {
+        $query = "SELECT id FROM usuarios WHERE email = :email LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) !== false;
     }
 }
