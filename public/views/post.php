@@ -23,7 +23,7 @@ $id = $_GET['id'] ?? null;
                                 <div class="col-md-8">
                                     <div class="alert alert-danger text-center mt-5 shadow">
                                         <h4 class="alert-heading mb-3"><i class="fa-solid fa-triangle-exclamation"></i> Ops!</h4>
-                                        <p>ID da postagem não foi fornecido.<br>
+                                        <p>ID da postagem não foi encontrado.<br>
                                         Por favor, volte e selecione uma postagem válida.</p>
                                         <a onclick="window.history.back();" class="btn btn-primary mt-3">
                                             <i class="fa-solid fa-arrow-left"></i> Voltar para Meus Posts
@@ -65,13 +65,14 @@ $id = $_GET['id'] ?? null;
 <script>
 const postId = <?= (int)$id ?>;
 const usuarioId = <?= (int)$_SESSION['usuario_id'] ?>;
+let post = null; // variável global para o post
 
 $(document).ready(function () {
-    $.getJSON(`${urlBase}/api/posts/${postId}`, function (response) {
-        $("#loader").addClass("d-none");
-
+    $.getJSON(`${urlBase}/api/posts/${postId}`)
+    .done(function (response) {
+        // Remover loader somente aqui, após processar a resposta
         if (response.status === "success") {
-            const post = response.data;
+            post = response.data;
             const isAuthor = post.usuario_id == usuarioId;
             const isAdmin = <?= (isset($_SESSION['admin']) && $_SESSION['admin'] == 1) ? 'true' : 'false' ?>;
 
@@ -121,9 +122,41 @@ $(document).ready(function () {
 
             $("#post-container").html(html);
         } else {
-            $("#post-container").html(`<div class="alert alert-warning">${response.message}</div>`);
+            // Se a mensagem da API for "Postagem não encontrada." exibe mensagem customizada
+            if (response.message === "Postagem não encontrada.") {
+                $("#post-container").html(`
+                    <div class="alert alert-danger text-center mt-5 shadow">
+                        <h4 class="alert-heading mb-3"><i class="fa-solid fa-triangle-exclamation"></i> Ops!</h4>
+                        <p>ID da postagem não foi encontrado.<br>
+                        Por favor, volte e selecione uma postagem válida.</p>
+                        <a onclick="window.history.back();" class="btn btn-primary mt-3">
+                            <i class="fa-solid fa-arrow-left"></i> Voltar para Meus Posts
+                        </a>
+                    </div>
+                `);
+            } else {
+                // Mensagem genérica para outros erros
+                $("#post-container").html(`<div class="alert alert-warning">${response.message}</div>`);
+            }
         }
+        $("#loader").addClass("d-none");
+    })
+    .fail(function () {
+        // Caso a requisição falhe (erro 404, 500, etc)
+        $("#post-container").html(`
+            <div class="alert alert-danger text-center mt-5 shadow">
+                <h4 class="alert-heading mb-3"><i class="fa-solid fa-triangle-exclamation"></i> Erro!</h4>
+                <p>Não foi possível carregar a postagem no momento. Tente novamente mais tarde.</p>
+            </div>
+        `);
+        $("#loader").addClass("d-none");
     });
+});
+
+$('#post-container').on('click', '.btn-editar', function () {
+    if (post) {
+        habilitarEdicao(post.titulo, post.conteudo);
+    }
 });
 
 $(document).on("input", "#edit-titulo, #edit-conteudo", function () {

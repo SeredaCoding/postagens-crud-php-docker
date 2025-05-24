@@ -48,12 +48,14 @@ class PostController {
     public function show($id) {
         $postagem = $this->post->readById($id);
         if ($postagem) {
+            http_response_code(200);
             return ["status" => "success", "data" => $postagem];
         }
 
         http_response_code(404);
         return ["status" => "error", "message" => "Postagem não encontrada."];
     }
+
 
     public function update($id, $data) {
         session_start();
