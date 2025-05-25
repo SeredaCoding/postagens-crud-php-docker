@@ -54,7 +54,7 @@ Estrutura MVC (Model-View-Controller)
 
 2. Navegue até o diretório Docker do projeto:
    ```bash
-   cd postagens-crud-php-docker/docker
+   cd docker
 
 3. Execute o comando para subir os containers:
    ```bash
