@@ -116,10 +116,17 @@ require_once(__DIR__.'/snippets/header.html');
 
             const btn = $('#btn-register');
 
-            let nome = $('#register-nome').val();
-            let email = $('#register-email').val();
+            let nome = $('#register-nome').val().trim();
+            let email = $('#register-email').val().trim();
             let senha = $('#register-senha').val();
             let confirmarSenha = $('#register-confirmar-senha').val();
+
+            // Validação: nome deve conter apenas letras (maiúsculas, minúsculas, acentos e espaços)
+            const nomeRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/;
+            if (!nomeRegex.test(nome)) {
+                $('#register-mensagem').html('<div class="alert alert-danger">O nome deve conter apenas letras e espaços.</div>');
+                return;
+            }
 
             if (senha !== confirmarSenha) {
                 $('#register-mensagem').html('<div class="alert alert-danger">As senhas não coincidem.</div>');
