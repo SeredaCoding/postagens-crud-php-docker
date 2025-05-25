@@ -15,6 +15,17 @@ Este projeto foi desenvolvido como parte do processo seletivo para a vaga de Des
 
 ---
 
+## 🗃️ Informações do Banco de Dados (MySQL via Docker)
+O sistema utiliza um banco de dados MySQL 8.0 configurado automaticamente via Docker. As credenciais padrão são:
+
+- Host: localhost | 127.0.0.1
+- Porta: 3306
+- Banco de dados: blog
+  
+- Username: admin
+- Password: 123
+
+---
 
 ## ⚙️ Tecnologias Utilizadas
 
@@ -27,6 +38,8 @@ MySQL 5.7+
 Docker / Docker Compose
 
 HTML + PHP Views
+
+---
 
 Estrutura MVC (Model-View-Controller)
 ## 📝 Funcionalidades
@@ -42,6 +55,9 @@ Estrutura MVC (Model-View-Controller)
 -Visualização de postagens públicas e privadas.
 
 -Separação entre posts do usuário logado e de outros usuários.
+
+---
+
 ## ⚙️ Como Executar o Projeto
 
 ### Pré-requisitos
@@ -63,6 +79,8 @@ Estrutura MVC (Model-View-Controller)
 4. Acesse o sistema no navegador:
    ```bash
     http://localhost:8000/
+
+---
 
 ## 📁 Estrutura de Diretórios
     postagens-crud-php-docker/
