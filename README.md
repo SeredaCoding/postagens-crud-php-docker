@@ -39,9 +39,10 @@ Docker / Docker Compose
 
 HTML + PHP Views
 
+Estrutura MVC (Model-View-Controller)
+
 ---
 
-Estrutura MVC (Model-View-Controller)
 ## 📝 Funcionalidades
 
 -Registro de usuários.
